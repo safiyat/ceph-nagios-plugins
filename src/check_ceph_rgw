@@ -71,6 +71,7 @@ def main():
   rgw_cmd.append('bucket')
   rgw_cmd.append('stats')
 
+  rgw_cmd.insert(0, "sudo")
   # exec command
   p = subprocess.Popen(rgw_cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
   output, err = p.communicate()

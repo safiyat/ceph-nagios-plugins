@@ -84,6 +84,8 @@ def main():
     if args.detail:
         ceph_health.append('detail')
 
+    ceph_health.insert(0, "sudo")
+
     #print ceph_health
     
     # exec command
