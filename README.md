@@ -154,7 +154,7 @@ Possible result includes OK (up), WARN (down or missing).
 ---
 # Modifications
 
-- `ceph stat` - Gives info for the **** section.
+
 
 Commands for my use case:
 - `ceph -s -f json-pretty` - Gives info for the **Ceph Cluster Overall Status** section.
