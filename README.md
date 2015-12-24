@@ -162,3 +162,4 @@ Commands for my use case:
 - `ceph osd stat -f json-pretty` - Gives info for the **Ceph Cluster OSD Status** section.
 - *Historical Data* - Gives info for the **Ceph Cluster Performace Metrics** section. (Refer [ceph-dash/app/templates/status.html:104](https://github.com/Crapworks/ceph-dash/blob/master/app/templates/status.html#L104) )
 - `ceph pg stat -f json-pretty` - Gives info for the **Ceph Cluster Placement Group Status** section.
+- `radosgw-admin bucket stats -f json-pretty` - Gives info for the **Ceph Cluster RGW Status**.
