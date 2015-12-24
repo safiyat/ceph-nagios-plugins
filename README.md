@@ -157,9 +157,15 @@ Possible result includes OK (up), WARN (down or missing).
 
 
 Commands for my use case:
-- `ceph -s -f json-pretty` - Gives info for the **Ceph Cluster Overall Status** section.
+- `ceph status -f json-pretty` - Gives info for the **Ceph Cluster Overall Status** section.
 - `ceph quorum_status -f json-pretty` - Gives info for the **Ceph Cluster Monitor Status** section.
 - `ceph osd stat -f json-pretty` - Gives info for the **Ceph Cluster OSD Status** section.
 - *Historical Data* - Gives info for the **Ceph Cluster Performace Metrics** section. (Refer [ceph-dash/app/templates/status.html:104](https://github.com/Crapworks/ceph-dash/blob/master/app/templates/status.html#L104) )
 - `ceph pg stat -f json-pretty` - Gives info for the **Ceph Cluster Placement Group Status** section.
 - `radosgw-admin bucket stats -f json-pretty` - Gives info for the **Ceph Cluster RGW Status**.
+- `ceph --watch` - Gives live info for the **Ceph Cluster**. An a-la `tail -f`.
+
+
+### Others worth watching:
+- `ceph df`- Cluster’s data usage and data distribution among pools. It is similar to Linux df.
+- `ceph mds stat` - To ensure if the metadata servers are up and active.
