@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import subprocess
+import sys
+
+# default ceph values
+CEPH_COMMAND = '/usr/bin/ceph'
+
+# nagios exit code
+STATUS_OK = 0
+STATUS_WARNING = 1
+STATUS_ERROR = 2
+STATUS_UNKNOWN = 3
+
+def main():
+
+    # parse args
+    parser = argparse.ArgumentParser(description="'ceph df' nagios plugin.")
+    parser.add_argument('-e','--exe', help='ceph executable [%s]' % CEPH_COMMAND)
+    parser.add_argument('-c','--conf', help='alternative ceph conf file')
+    parser.add_argument('-V','--version', help='show version and exit', action='store_true')
+    args = parser.parse_args()
+   
+    # validate args
+    ceph_exec = args.exe if args.exe else CEPH_COMMAND
+    if not os.path.exists(ceph_exec):
+        print "ERROR: ceph executable '%s' doesn't exist" % ceph_exec
+        return STATUS_UNKNOWN
+    
+    if args.version:
+        print 'version %s' % __version__
+        return STATUS_OK
+
+    if args.conf and not os.path.exists(args.conf):
+        print "ERROR: ceph conf file '%s' doesn't exist" % args.conf
+        return STATUS_UNKNOWN
+        
+    # build command
+    ceph_df = [ceph_exec]
+    if args.conf:
+        ceph_df.append('-c')
+        ceph_df.append(args.conf)
+    ceph_df.append('df')
+
+    ceph_df.insert(0, "sudo")
+
+    #print ceph_df
+    
+    # exec command
+    p = subprocess.Popen(ceph_df,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    output, err = p.communicate()
+    output = output.splitlines()[1:3]
+    # parse output
+    # print "output:"
+    for line in output:
+        print line
+
+    used = float(output[-1].split()[-1])
+    if used > 95:
+        return STATUS_ERROR
+    elif used > 80:
+        return STATUS_WARNING
+    elif used >= 0:
+        return STATUS_OK
+    # print "err:", err
+    # if output:
+    #     # merge multi-lines of output in one line
+    #     # one_line = output.replace('\n','; ')
+    #     one_line = output
+    #     if one_line.startswith('DF_OK'):
+    #         #print 'DF OK:', one_line[len('DF_OK')+1:]
+    #         one_line= one_line[len('DF_OK')+1:].strip()
+    #         if one_line:
+    #             print 'DF OK:', one_line
+    #         else:
+    #             print 'DF OK'
+    #         return STATUS_OK
+    #     elif one_line.startswith('DF_WARN'):
+    #         print 'DF WARNING:', one_line[len('DF_WARN')+1:]
+    #         return STATUS_WARNING
+    #     elif one_line.startswith('DF_ERR'):
+    #         print 'DF ERROR:', one_line[len('DF_ERR')+1:]
+    #         return STATUS_ERROR
+    #     else:
+    #         print one_line
+        
+    # elif err:
+    #     # read only first line of error
+    #     one_line = err.split('\n')[0]
+    #     if '-1 ' in one_line:
+    #         idx = one_line.rfind('-1 ')
+    #         print 'ERROR: %s: %s' % (ceph_exec, one_line[idx+len('-1 '):])
+    #     else:
+    #         print one_line
+    return STATUS_UNKNOWN
+
+
+if __name__ == "__main__":
+    sys.exit(main())
