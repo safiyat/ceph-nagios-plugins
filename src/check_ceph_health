@@ -46,15 +46,11 @@ def main():
 
     ceph_health.insert(0, "sudo")
 
-    #print ceph_health
-    
     # exec command
     p = subprocess.Popen(ceph_health,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     output, err = p.communicate()
     
     # parse output
-    #print "output:", output
-    #print "err:", err
     if output:
         # merge multi-lines of output in one line
         # one_line = output.replace('\n','; ')
