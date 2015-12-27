@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import subprocess
+import sys
+
+# default ceph values
+CEPH_COMMAND = '/usr/bin/ceph'
+
+# nagios exit code
+STATUS_OK = 0
+STATUS_WARNING = 1
+STATUS_ERROR = 2
+STATUS_UNKNOWN = 3
+
+def main():
+
+    # parse args
+    parser = argparse.ArgumentParser(description="'ceph mds' nagios plugin.")
+    parser.add_argument('-e','--exe', help='ceph executable [%s]' % CEPH_COMMAND)
+    parser.add_argument('-c','--conf', help='alternative ceph conf file')
+    parser.add_argument('-V','--version', help='show version and exit', action='store_true')
+    args = parser.parse_args()
+   
+    # validate args
+    ceph_exec = args.exe if args.exe else CEPH_COMMAND
+    if not os.path.exists(ceph_exec):
+        print "ERROR: ceph executable '%s' doesn't exist" % ceph_exec
+        return STATUS_UNKNOWN
+    
+    if args.version:
+        print 'version %s' % __version__
+        return STATUS_OK
+
+    if args.conf and not os.path.exists(args.conf):
+        print "ERROR: ceph conf file '%s' doesn't exist" % args.conf
+        return STATUS_UNKNOWN
+        
+    # build command
+    ceph_mds = [ceph_exec]
+    if args.conf:
+        ceph_mds.append('-c')
+        ceph_mds.append(args.conf)
+    ceph_mds.append('mds')
+    ceph_mds.append('stat')
+    ceph_mds.insert(0, "sudo")
+    
+    # exec command
+    p = subprocess.Popen(ceph_mds,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    output, err = p.communicate()
+
+    # parse output
+    print output
+    
+    return STATUS_OK
+
+
+if __name__ == "__main__":
+    sys.exit(main())

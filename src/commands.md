@@ -108,3 +108,9 @@ Paramaters:
 - `xml` - One line XML
 - `xml-pretty`- Formatted XML
 - `plain` - Human readable
+
+---
+To do:
+- Interpret the STATUS_OK, STATUS_WARN and STATUS_ERROR for check_ceph_mds.
+- Interpret the STATUS_OK, STATUS_WARN and STATUS_ERROR for check_ceph_pg.
+- Write quorum_status, mon stat, osd stat
