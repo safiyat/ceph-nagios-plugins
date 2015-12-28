@@ -82,7 +82,7 @@ def main():
   ceph_cmd.append(CEPH_COMMAND)
   ceph_cmd.append('stat')
   ceph_cmd.append('-f')
-  ceph_cmd.append('json-pretty')
+  ceph_cmd.append('json')
   ceph_cmd.insert(0, "sudo")
 
   # exec command
@@ -123,7 +123,7 @@ def main():
   for obj in pg_stat['num_pg_by_state']:
     print obj['name'] + ": " + str(obj['num'])
   print "Total pg count:" + str(pg_stat['num_pgs'])
-  
+
   return STATUS_OK
 
 
