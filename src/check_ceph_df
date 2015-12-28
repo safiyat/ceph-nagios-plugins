@@ -58,7 +58,7 @@ def main():
     used = float(output[-1].split()[-1])
     if used > 95:
         return STATUS_ERROR
-    elif used > 80:
+    elif used > 90:
         return STATUS_WARNING
     elif used >= 0:
         return STATUS_OK
