@@ -55,8 +55,16 @@ def main():
     p = subprocess.Popen(ceph_quorum_status,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     output, err = p.communicate()
     parsed_output = json.loads(output)
-    print parsed_output
 
+    if len(parsed_output['quorum_names']) == 0:
+        print "HEALTH ERROR: No monitors found."
+        return STATUS_ERROR
+    if len(parsed_output['quorum_names']) < len(parsed_output['monmap']['mons']):
+        print "HEALTH WARNING: %d out of %d mons are in the quorum." % (len(parsed_output['quorum_names']), len(parsed_output['monmap']['mons']))
+        return STATUS_WARNING
+    if len(parsed_output['quorum_names']) == len(parsed_output['monmap']['mons']):
+        print "HEALTH OK: All %d mons are up and in the quorum." % len(parsed_output['quorum_names'])
+        return STATUS_OK
     return STATUS_UNKNOWN
 
 
