@@ -45,7 +45,7 @@ def main():
         ceph_quorum_status.append(args.conf)
     ceph_quorum_status.append('quorum_status')
     ceph_quorum_status.append('-f')
-    ceph_quorum_status.append('json-pretty')
+    ceph_quorum_status.append('json')
 
     ceph_quorum_status.insert(0, "sudo")
 
