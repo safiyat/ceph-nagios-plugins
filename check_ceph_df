@@ -14,11 +14,13 @@ STATUS_OK = 0
 STATUS_WARNING = 1
 STATUS_ERROR = 2
 STATUS_UNKNOWN = 3
+WARNING_PERC = 85
+ERROR_PERC = 95
 
 def main():
 
     # parse args
-    parser = argparse.ArgumentParser(description="'ceph quorum_status' nagios plugin.")
+    parser = argparse.ArgumentParser(description="'ceph df' nagios plugin.")
     parser.add_argument('-e','--exe', help='ceph executable [%s]' % CEPH_COMMAND)
     parser.add_argument('-c','--conf', help='alternative ceph conf file')
     parser.add_argument('-V','--version', help='show version and exit', action='store_true')
@@ -39,32 +41,37 @@ def main():
         return STATUS_UNKNOWN
 
     # build command
-    ceph_quorum_status = [ceph_exec]
+    ceph_df = [ceph_exec]
     if args.conf:
-        ceph_quorum_status.append('-c')
-        ceph_quorum_status.append(args.conf)
-    ceph_quorum_status.append('quorum_status')
-    ceph_quorum_status.append('-f')
-    ceph_quorum_status.append('json')
+        ceph_df.append('-c')
+        ceph_df.append(args.conf)
+    ceph_df.append('df')
+    ceph_df.append('--format')
+    ceph_df.append('json')
 
-    ceph_quorum_status.insert(0, "sudo")
-
-    #print ceph_quorum_status
+    ceph_df.insert(0, "sudo")
 
     # exec command
-    p = subprocess.Popen(ceph_quorum_status,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p = subprocess.Popen(ceph_df,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     output, err = p.communicate()
-    parsed_output = json.loads(output)
+    info = json.loads(output)
 
-    if len(parsed_output['quorum_names']) == 0:
-        print "HEALTH ERROR: No monitors found."
+    size_gb = info['stats']['total_bytes']/float(2**30)
+    avail_gb = info['stats']['total_avail_bytes']/float(2**30)
+    used_gb = info['stats']['total_used_bytes']/float(2**30)
+    perc_used = (used_gb * 100) / size_gb
+
+    perfdata = "Size=%.2fGB;;;; Usage=%.2fGB;%.2f;%.2f;0;%.2f" % (size_gb, used_gb, ((size_gb * WARNING_PERC) / 100.0), ((size_gb * ERROR_PERC) / 100.0), size_gb)
+    message = "SIZE: %.2fGB    AVAIL:  %.2fGB    USED: %.2fGB    (%.2f %%)    " % (size_gb, avail_gb, used_gb, perc_used)
+
+    print message + " | " + perfdata
+    if perc_used > ERROR_PERC:
         return STATUS_ERROR
-    if len(parsed_output['quorum_names']) < len(parsed_output['monmap']['mons']):
-        print "HEALTH WARNING: %d out of %d mons are in the quorum." % (len(parsed_output['quorum_names']), len(parsed_output['monmap']['mons']))
+    elif perc_used > WARNING_PERC:
         return STATUS_WARNING
-    if len(parsed_output['quorum_names']) == len(parsed_output['monmap']['mons']):
-        print "HEALTH OK: All %d mons are up and in the quorum." % len(parsed_output['quorum_names'])
+    elif perc_used >= 0:
         return STATUS_OK
+
     return STATUS_UNKNOWN
 
 

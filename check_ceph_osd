@@ -68,13 +68,13 @@ def main():
     print "OSD ERROR: %s" % err
     return STATUS_ERROR
   if up_osd == in_osd:
-    print "OSD OK: %d osds    %d in    %d up    %d num_remapped_pgs" % (osds, in_osd, up_osd, num_remapped_pgs)
+    print "OSD OK: %d osds    %d in    %d up    %d num_remapped_pgs | osds_in=%d;%d;0;0;%d" % (osds, in_osd, up_osd, num_remapped_pgs, in_osd, in_osd - 1, osds)
     return STATUS_OK
   if up_osd == 0:
-    print "OSD ERROR: %d osds    %d in    %d up    %d num_remapped_pgs" % (osds, in_osd, up_osd, num_remapped_pgs)
+    print "OSD ERROR: %d osds    %d in    %d up    %d num_remapped_pgs | osds_in=%d;%d;0;0;%d" % (osds, in_osd, up_osd, num_remapped_pgs, in_osd, in_osd - 1, osds)
     return STATUS_ERROR
   if up_osd < in_osd:
-    print "OSD WARN: %d osds    %d in    %d up    %d num_remapped_pgs" % (osds, in_osd, up_osd, num_remapped_pgs)
+    print "OSD WARN: %d osds    %d in    %d up    %d num_remapped_pgs | osds_in=%d;%d;0;0;%d" % (osds, in_osd, up_osd, num_remapped_pgs, in_osd, in_osd - 1, osds)
     return STATUS_WARNING
 
   print "OSD WARN: no OSD.%s found on host %s" % (args.osdid, args.host)

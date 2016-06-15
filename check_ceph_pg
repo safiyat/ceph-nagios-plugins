@@ -102,27 +102,14 @@ def main():
     print "PG ERROR: could not parse '%s' output: %s: %s" % (CEPH_COMMAND,output,e)
     return STATUS_UNKNOWN
 
-  #print "XXX: pg_stat['quorum_names']:", pg_stat['quorum_names']
-
-  # do our checks
-  # is_monitor = False
-  # for mon in pg_stat['monmap']['mons']:
-  #   if mon['name'] == args.monid:
-  #     is_monitor = True
-  # if not is_monitor:
-  #   print "MON WARN: mon '%s' is not in monmap: %s" % (args.monid,pg_stat['monmap']['mons'])
-  #   return STATUS_WARNING
-
-  # in_quorum = args.monid in pg_stat['quorum_names']
-  # if in_quorum:
-  #   print "MON OK"
-  #   return STATUS_OK
-  # else:
-  #   print "MON WARN: no MON '%s' found in quorum" % args.monid
-  #   return STATUS_WARNING
+  message = ""
+  perfdata = ""
   for obj in pg_stat['num_pg_by_state']:
-    print obj['name'] + ": " + str(obj['num'])
-  print "Total pg count:" + str(pg_stat['num_pgs'])
+    message += obj['name'] + ": " + str(obj['num']) + "\n"
+    perfdata = " %s=%d;;;;" % (obj['name'].replace('+', '_'), obj['num'])
+
+  print "Total pg count:" + str(pg_stat['num_pgs']) + " | " + perfdata + "\n" + "\n".join(message.splitlines()[1:])
+  print message.splitlines()[0]
 
   return STATUS_OK
 
