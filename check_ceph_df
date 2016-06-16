@@ -17,13 +17,16 @@ STATUS_UNKNOWN = 3
 WARNING_PERC = 85
 ERROR_PERC = 95
 
+
 def main():
 
     # parse args
     parser = argparse.ArgumentParser(description="'ceph df' nagios plugin.")
-    parser.add_argument('-e','--exe', help='ceph executable [%s]' % CEPH_COMMAND)
-    parser.add_argument('-c','--conf', help='alternative ceph conf file')
-    parser.add_argument('-V','--version', help='show version and exit', action='store_true')
+    parser.add_argument('-e', '--exe', help='ceph executable [%s]' %
+                        CEPH_COMMAND)
+    parser.add_argument('-c', '--conf', help='alternative ceph conf file')
+    parser.add_argument('-V', '--version', help='show version and exit',
+                        action='store_true')
     args = parser.parse_args()
 
     # validate args
@@ -52,7 +55,8 @@ def main():
     ceph_df.insert(0, "sudo")
 
     # exec command
-    p = subprocess.Popen(ceph_df,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p = subprocess.Popen(ceph_df, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
     output, err = p.communicate()
     info = json.loads(output)
 
@@ -61,8 +65,11 @@ def main():
     used_gb = info['stats']['total_used_bytes']/float(2**30)
     perc_used = (used_gb * 100) / size_gb
 
-    perfdata = "Size=%.2fGB;;;; Usage=%.2fGB;%.2f;%.2f;0;%.2f" % (size_gb, used_gb, ((size_gb * WARNING_PERC) / 100.0), ((size_gb * ERROR_PERC) / 100.0), size_gb)
-    message = "SIZE: %.2fGB    AVAIL:  %.2fGB    USED: %.2fGB    (%.2f %%)    " % (size_gb, avail_gb, used_gb, perc_used)
+    perfdata = "Size=%.2fGB;;;; Usage=%.2fGB;%.2f;%.2f;0;%.2f" % (
+        size_gb, used_gb, ((size_gb * WARNING_PERC) / 100.0),
+        ((size_gb * ERROR_PERC) / 100.0), size_gb)
+    message = "SIZE: %.2fGB    AVAIL:  %.2fGB    USED: %.2fGB    (%.2f %%) " \
+              % (size_gb, avail_gb, used_gb, perc_used)
 
     print message + " | " + perfdata
     if perc_used > ERROR_PERC:
