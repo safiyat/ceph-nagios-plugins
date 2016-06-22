@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+
+"""
+This plugin prints the ceph health and IOPS of the cluster.
+"""
+
+import argparse
+import rados
+import sys
+import json
+
+# nagios exit code
+STATUS_OK = 0
+STATUS_WARNING = 1
+STATUS_ERROR = 2
+STATUS_UNKNOWN = 3
+
+WARNING_PERC = 85
+CRITICAL_PERC = 95
+
+
+def main():
+
+    # parse args
+    parser = argparse.ArgumentParser(description="'ceph df' nagios plugin.")
+    parser.add_argument('-r', '--rados-id', help='Rados ID.')
+    parser.add_argument('-c', '--conf', help='Alternative ceph conf file.')
+
+    args = parser.parse_args()
+
+    if args.rados_id is not None and not isinstance(args.rados_id, str):
+        raise TypeError('rados_id must be a string or None')
+    if args.conf is not None and not isinstance(args.conf, str):
+        raise TypeError('conf must be a string or None')
+
+    if 'rados_id' in args:
+        rados_id = args.rados_id
+    else:
+        rados_id = None
+
+    if 'conf' in args:
+        conf = args.conf
+    else:
+        conf = None
+
+    if not conf:
+        conf = '/etc/ceph/ceph.conf'
+
+    HEALTH = {}
+    HEALTH['HEALTH_OK'] = STATUS_OK
+    HEALTH['HEALTH_WARN'] = STATUS_WARNING
+    HEALTH['HEALTH_ERR'] = STATUS_ERROR
+
+    cluster = rados.Rados(rados_id=rados_id, conffile=conf)
+    cluster.connect()
+
+    cmd = {"prefix": "status", "format": "json"}
+    ret, buf, errs = cluster.mon_command(json.dumps(cmd), b'')
+
+    status = json.loads(buf)
+    h = u'health'
+    ceph_health = status[h][h][u'health_services'][0][u'mons'][0][h]
+    ceph_iops = status[u'pgmap'][u'op_per_sec']
+
+    health = "HEALTH=%d;;;;" % HEALTH[ceph_health]
+
+    iops = "IOPS=%d;;;;" % ceph_iops
+
+    perfdata = " ".join([health, iops])
+
+    message = "%s     IOPS:%d" % (ceph_health, ceph_iops)
+
+    print message + " | " + perfdata
+
+    return HEALTH[ceph_health]
+
+
+if __name__ == "__main__":
+    sys.exit(main())
