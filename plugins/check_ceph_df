@@ -5,10 +5,8 @@ This plugin prints the ceph usage statistics on the current node.
 """
 
 import argparse
-import os
 import rados
 import sys
-import json
 
 # nagios exit code
 STATUS_OK = 0
@@ -51,6 +49,7 @@ def main():
     cluster.connect()
 
     cluster_stats = cluster.get_cluster_stats()
+    cluster.shutdown()
 
     size = "Size=%.2fKB;;;; " % cluster_stats['kb']
 
