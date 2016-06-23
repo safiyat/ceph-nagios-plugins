@@ -69,3 +69,8 @@ venv/
 *~
 
 rados.py
+
+
+# Emacs
+.#*
+\#*
